@@ -1,5 +1,5 @@
-import Models from "../models/index.js";
 import ApiError from "../utils/api_error.js";
+import User from "../model/user.js";
 
 const register = async (req, res, next) => {
   try {
@@ -8,7 +8,7 @@ const register = async (req, res, next) => {
     let query = {
       email: user_data.email,
     };
-    const find_user = await Models.user.findOne({ where: query });
+    const find_user = await User.findOne({ where: query });
 
     if (find_user) {
       res
@@ -16,7 +16,7 @@ const register = async (req, res, next) => {
         .json({ success: false, message: "user already exist", data: null });
     }
 
-    const user = await Models.user.create(user_data);
+    const user = await User(user_data).save();
 
     res.status(201).json({
       success: true,
@@ -32,13 +32,10 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
-    const user = await Models.user.findOne;
-
     const { email, password } = req.body;
 
-    const user_data = await Models.user.findOne({ where: { email } });
-
-    if (!user_data) {
+    const user = await User.findOne({ email });
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
@@ -46,9 +43,8 @@ const login = async (req, res, next) => {
       });
     }
 
-    const is_match = await user_data.isPasswordMatch(password);
-
-    if (!is_match) {
+    const isMatch = await user.isPasswordCorrect(password);
+    if (!isMatch) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -56,19 +52,18 @@ const login = async (req, res, next) => {
       });
     }
 
-    const user_info = user_data.toJSON();
-    delete user_info.password;
-    const auth_tokens = await generateAuthTokens(user_data);
+    const userInfo = user.toObject();
+    delete userInfo.password;
 
     res.status(200).json({
       success: true,
-      message: "user Login successfully",
-      data: { ...user_info, auth_tokens },
+      message: "User logged in successfully",
+      data: userInfo,
     });
   } catch (error) {
-    console.log("error ::", error);
+    console.error("Login error:", error);
 
-    throw new ApiError(500, "Something Wents wrong");
+    next(new ApiError(500, "Something went wrong"));
   }
 };
 
