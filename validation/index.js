@@ -44,21 +44,4 @@ const getBookSchema = {
     .unknown(false),
 };
 
-const borrowReturnBookSchema = {
-  params: joi.object().keys({
-    userId: joi.string().uuid().required(),
-  }),
-  body: joi
-    .object()
-    .keys({
-      bookId: joi.string().uuid().required(),
-    })
-    .unknown(false),
-};
-export {
-  registerSchema,
-  loginSchema,
-  createBookSchema,
-  getBookSchema,
-  borrowReturnBookSchema,
-};
+export { registerSchema, loginSchema, createBookSchema, getBookSchema };
