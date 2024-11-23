@@ -1,4 +1,4 @@
-import ApiError from "../utils/api_error";
+import ApiError from "../utils/api_error.js";
 import Book from "../model/book.js";
 
 const createBook = async (req, res, next) => {
@@ -40,4 +40,33 @@ const createBook = async (req, res, next) => {
   }
 };
 
-export { createBook };
+const getBooks = async (req, res, next) => {
+  try {
+    const { genre, author } = req.query;
+
+    const filters = {};
+    if (genre) {
+      filters.genre = genre;
+    }
+    if (author) {
+      filters.author = author;
+    }
+
+    const books = await Book.find(filters);
+
+    res.status(200).json({
+      success: true,
+      message: "Books fetched successfully",
+      data: books,
+    });
+  } catch (error) {
+    console.error("Error fetching books:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch books",
+      error: error.message,
+    });
+  }
+};
+export { createBook, getBooks };
