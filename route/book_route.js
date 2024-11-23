@@ -1,11 +1,16 @@
 import express from "express";
 import validate from "../middlewares/validation.js";
 import { loginSchema, registerSchema } from "../validation/index.js";
-import { createBook, getBooks } from "../controller/book_controller.js";
+import {
+  borrowBook,
+  createBook,
+  getBooks,
+} from "../controller/book_controller.js";
 
 const route = express.Router();
 
 route.post("/books", createBook);
 route.get("/books", getBooks);
+route.post("/users/:userId/borrow", borrowBook);
 
 export default route;
