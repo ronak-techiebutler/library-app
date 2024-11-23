@@ -117,4 +117,57 @@ const borrowBook = async (req, res, next) => {
   }
 };
 
-export { createBook, getBooks, borrowBook };
+const returnBook = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { bookId } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        data: null,
+      });
+    }
+
+    if (!user.borrowedBooks.includes(bookId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Book is not in the user's borrowed books list",
+        data: null,
+      });
+    }
+
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+        data: null,
+      });
+    }
+
+    book.availableCopies += 1;
+    await book.save();
+
+    user.borrowedBooks = user.borrowedBooks.filter(
+      (id) => id.toString() !== bookId
+    );
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Book returned successfully",
+      data: {
+        user: user,
+        book: book,
+      },
+    });
+  } catch (error) {
+    console.error("erro:", error);
+    throw new ApiError(500, "Failed to return book");
+  }
+};
+
+export { createBook, getBooks, borrowBook, returnBook };
