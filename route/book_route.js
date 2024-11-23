@@ -1,6 +1,12 @@
 import express from "express";
 import validate from "../middlewares/validation.js";
-import { loginSchema, registerSchema } from "../validation/index.js";
+import {
+  borrowReturnBookSchema,
+  createBookSchema,
+  getBookSchema,
+  loginSchema,
+  registerSchema,
+} from "../validation/index.js";
 import {
   borrowBook,
   createBook,
@@ -10,9 +16,17 @@ import {
 
 const route = express.Router();
 
-route.post("/books", createBook);
-route.get("/books", getBooks);
-route.post("/users/:userId/borrow", borrowBook);
-route.post("/users/:userId/return", returnBook);
+route.post("/books", validate(createBookSchema), createBook);
+route.get("/books", validate(getBookSchema), getBooks);
+route.post(
+  "/users/:userId/borrow",
+  validate(borrowReturnBookSchema),
+  borrowBook
+);
+route.post(
+  "/users/:userId/return",
+  validate(borrowReturnBookSchema),
+  returnBook
+);
 
 export default route;
